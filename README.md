@@ -1,4 +1,4 @@
-RATS plugin for the android gradle build tools
+[RATS](https://www.github.com/wmbest2/rats-server) plugin for the android gradle build tools
 
 ##Setup
 
