@@ -1,7 +1,18 @@
 apply plugin: 'groovy'
+apply plugin: 'nexus'
 
-group = 'com.wmbest.rats'
-version = '0.2'
+group = 'com.wmbest.gradle'
+version = '0.1.0'
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'org.gradle.api.plugins:gradle-nexus-plugin:0.7'
+    }
+}
 
 repositories {
     mavenCentral()
@@ -27,4 +38,35 @@ jar {
 
 task wrapper(type: Wrapper) {
     gradleVersion = '1.12'
+}
+
+modifyPom {
+    project {
+        artifactId 'rats'
+        name 'rats'
+        description 'Gradle Plugin for Remote Android Test Service Testing'
+        url 'https://github.com/wmbest2/rats-gradle-plugin'
+
+        scm {
+            url 'https://github.com/wmbest2/rats-gradle-plugin'
+            connection 'scm:git@github.com:wmbest2/rats-gradle-plugin.git'
+            developerConnection 'scm:git@github.com:wmbest2/rats-gradle-plugin.git'
+        }
+
+        licenses {
+            license {
+                name 'MIT'
+                url 'http://opensource.org/licenses/MIT'
+                distribution 'repo'
+            }
+        }
+
+        developers {
+            developer {
+                id 'wmbest2'
+                name 'William Best'
+                email 'wmbest2@gmail.com'
+            }
+        }
+    }
 }
