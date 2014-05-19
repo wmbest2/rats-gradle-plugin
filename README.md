@@ -15,6 +15,10 @@ buildscript {
 
 apply plugin: 'android'
 apply plugin: 'rats'
+
+rats {
+    // Configuration
+}
 ```
 
 ###Tasks
