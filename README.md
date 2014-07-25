@@ -9,7 +9,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:0.10.+'
-        classpath 'com.wmbest.gradle:rats:0.1.+'
+        classpath 'com.wmbest.gradle:rats:0.2.+'
     }
 }
 
@@ -20,6 +20,8 @@ rats {
     // Configuration
 }
 ```
+
+You must running against RATS server version 2.0 or newer
 
 ###Tasks
 
