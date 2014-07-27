@@ -2,6 +2,7 @@ package com.wmbest.rats
 
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
+import com.android.builder.testing.api.TestException;
 import com.android.builder.testing.api.TestServer;
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.AppExtension
@@ -33,6 +34,9 @@ import java.io.File
 import javax.inject.Inject
 
 class RATSPlugin extends TestServer implements Plugin<Project> {
+
+    static final String CONNECTION_ERROR = "Couldn't reach rats server.  Check that it is connected and running the latest version."
+
     Project project;
     void apply(Project project) {
         this.project = project
@@ -47,6 +51,10 @@ class RATSPlugin extends TestServer implements Plugin<Project> {
 
     void uploadApks(@NonNull String variant, @NonNull File testApk, @Nullable File app) {
         def http = new HTTPBuilder(project.rats.server + "/api/run")
+
+        if (project.rats.user != null && project.rats.password != null) {
+            http.auth.basic project.rats.user, project.rats.password
+        }
 
         http.getClient().getParams().setParameter("http.connection.timeout", project.rats.timeout)
         http.getClient().getParams().setParameter("http.socket.timeout", project.rats.timeout)
@@ -65,6 +73,9 @@ class RATSPlugin extends TestServer implements Plugin<Project> {
                 }
                 if (project.rats.serials != null) {
                     entity.addPart('serials', new StringBody(project.rats.serials.join(',')))
+                }
+                if (project.rats.message != null) {
+                    entity.addPart('message', new StringBody(project.rats.message))
                 }
                 entity.addPart('strict', new StringBody(booleanToString(project.rats.strict)))
                 req.entity = entity
@@ -97,6 +108,10 @@ class RATSPlugin extends TestServer implements Plugin<Project> {
 
             def http = new HTTPBuilder(project.rats.server + "/api/ping")
 
+            if (project.rats.user != null && project.rats.password != null) {
+                http.auth.basic project.rats.user, project.rats.password
+            }
+
             http.getClient().getParams().setParameter("http.connection.timeout", project.rats.timeout)
             http.getClient().getParams().setParameter("http.socket.timeout", project.rats.timeout)
 
@@ -108,12 +123,12 @@ class RATSPlugin extends TestServer implements Plugin<Project> {
                     }
 
                     response.failure = { resp, json ->
-                        throw new GradleException("Couldn't reach rats server.  Check that it is connected and running the latest version.")
+                        throw new GradleException(CONNECTION_ERROR)
                     }
                 }
                 return success
             } catch(Exception  e) {
-                throw new GradleException("Couldn't reach rats server.  Check that it is connected and running the latest version.")
+                throw new GradleException(CONNECTION_ERROR)
             } finally {
                 http.shutdown();
             }
@@ -129,6 +144,8 @@ class RATSPlugin extends TestServer implements Plugin<Project> {
 
 class RATSExtension {
     String server = 'http://localhost:3000'
+    String user
+    String password
     Integer count
     Integer timeout
     String[] serials

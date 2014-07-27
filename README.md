@@ -33,7 +33,10 @@ For example if I have build type `debug` I will want to run the
 ###Parameters:
 
   * `server` The server on which to run (Default `http://localhost:3000`)
+  * `user` For use with basic auth protected sites
+  * `password` For use with basic auth protected sites
   * `count` Number of devices (Not set by default)
   * `serials` Comma separated list of device serials (Not set by default)
   * `strict` Strict mode (Default `false`, will run until timeout if devices dont match)
   * `timeout` Timeout period in millis (Default 20 minutes)
+  * `message` A field for describing the run (useful for git messages, etc.)
