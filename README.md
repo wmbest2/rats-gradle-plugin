@@ -25,10 +25,7 @@ You must running against RATS server version 2.0 or newer
 
 ###Tasks
 
-All testable build variants will obtain a specialized task
-
-For example if I have build type `debug` I will want to run the
-`remoteDebugTest` task.
+All testable build variants will be tested using the `deviceCheck` task.
 
 ###Parameters:
 
