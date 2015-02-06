@@ -58,6 +58,7 @@ class RATSPlugin extends TestServer implements Plugin<Project> {
 
         http.getClient().getParams().setParameter("http.connection.timeout", project.rats.timeout)
         http.getClient().getParams().setParameter("http.socket.timeout", project.rats.timeout)
+        http.getClient().getParams().setParameter("http.keepAlive", false) 
 
         try {
             http.request(POST, JSON) { req ->
