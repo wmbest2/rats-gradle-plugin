@@ -1,9 +1,9 @@
 package com.wmbest.rats
 
-import com.android.annotations.NonNull;
-import com.android.annotations.Nullable;
-import com.android.builder.testing.api.TestException;
-import com.android.builder.testing.api.TestServer;
+import com.android.annotations.NonNull
+import com.android.annotations.Nullable
+import com.android.builder.testing.api.TestException
+import com.android.builder.testing.api.TestServer
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.AppPlugin
@@ -37,12 +37,27 @@ class RATSPlugin extends TestServer implements Plugin<Project> {
 
     static final String CONNECTION_ERROR = "Couldn't reach rats server.  Check that it is connected and running the latest version."
 
-    Project project;
+    Project project
     void apply(Project project) {
         this.project = project
         def hasApp = project.hasProperty('android')
-        project.extensions.create("rats", RATSExtension);
-        project.android.testServer(this);
+        project.extensions.create("rats", RATSExtension)
+        project.android.testServer(this)
+        project.tasks.create(name: "pingRatsServer") << {
+            pingServer()
+        }
+
+        project.gradle.startParameter.getTaskNames().find { task ->
+            if (task.equals("deviceCheck")) {
+                project.tasks["preBuild"].dependsOn 'pingRatsServer'
+                return true
+            }
+            if (task.startsWith("ratsUpload")) {
+                project.tasks["preBuild"].dependsOn 'pingRatsServer'
+                return true
+            }
+            return false
+        }
     }
 
     String getName() {
@@ -58,7 +73,7 @@ class RATSPlugin extends TestServer implements Plugin<Project> {
 
         http.getClient().getParams().setParameter("http.connection.timeout", project.rats.timeout)
         http.getClient().getParams().setParameter("http.socket.timeout", project.rats.timeout)
-        http.getClient().getParams().setParameter("http.keepAlive", false) 
+        http.getClient().getParams().setParameter("http.keepAlive", false)
 
         try {
             http.request(POST, JSON) { req ->
@@ -88,7 +103,7 @@ class RATSPlugin extends TestServer implements Plugin<Project> {
 
                 response.'500' = { resp, json ->
                     String output = "${project.rats.server}/#/runs/${json.name}"
-                    String failure = "Tests Failed on the Following devices:\n";
+                    String failure = "Tests Failed on the Following devices:\n"
                     for (d in json.suites) {
                         if (d.errors > 0 || d.failures > 0) {
                             failure += "\t${d.device.manufacturer} ${d.device.model} with ${d.errors} Errors and ${d.failures} Failures\n"
@@ -99,13 +114,20 @@ class RATSPlugin extends TestServer implements Plugin<Project> {
                 }
             }
         } finally {
-            http.shutdown();
+            http.shutdown()
         }
     }
 
     boolean isConfigured() {
-        if (project != null && project.hasProperty('rats')
-            && project.rats.server != null) {
+        return true
+    }
+
+    def booleanToString(def property) {
+        property ? 'true' : 'false'
+    }
+
+    void pingServer() {
+        if (project != null && project.hasProperty('rats') && project.rats.server != null) {
 
             def http = new HTTPBuilder(project.rats.server + "/api/ping")
 
@@ -117,30 +139,23 @@ class RATSPlugin extends TestServer implements Plugin<Project> {
             http.getClient().getParams().setParameter("http.socket.timeout", project.rats.timeout)
 
             try {
-                boolean success = false;
                 http.request(GET, TEXT) { req ->
                     response.success = { resp, json ->
-                        success = true
+                        // cool
                     }
 
                     response.failure = { resp, json ->
                         throw new GradleException(CONNECTION_ERROR)
+                        // throw new GradleException("${CONNECTION_ERROR} (${resp})")
                     }
                 }
-                return success
             } catch(Exception  e) {
-                throw new GradleException(CONNECTION_ERROR)
+                throw new GradleException(CONNECTION_ERROR, e)
             } finally {
-                http.shutdown();
+                http.shutdown()
             }
         }
-        return false
     }
-
-    def booleanToString(def property) {
-        property ? 'true' : 'false'
-    }
-
 }
 
 class RATSExtension {

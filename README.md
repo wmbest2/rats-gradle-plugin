@@ -13,8 +13,8 @@ buildscript {
     }
 }
 
-apply plugin: 'android'
-apply plugin: 'rats'
+apply plugin: 'com.android.application'
+apply plugin: 'com.wmbest.rats'
 
 rats {
     // Configuration
